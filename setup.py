@@ -14,9 +14,11 @@ setup(
             "resources/debian/rules.j2",
             "resources/debian/triggers.j2",
             "resources/debian/changelog.j2",
-            "resources/debian/compat.j2"
+            "resources/debian/compat.j2",
+            "resources/Vagrantfile"
             ]
         },
     scripts=['bin/make-deb'],
-    install_requires=['Jinja2']
+    install_requires=['Jinja2'],
+    zip_safe=False
 )

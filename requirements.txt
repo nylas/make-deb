@@ -1,0 +1,4 @@
+-f file:///Users/systemizer/.cache/wheel
+Jinja2==2.7.3
+MarkupSafe==0.23
+wheel==0.24.0

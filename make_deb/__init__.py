@@ -77,16 +77,7 @@ class DebianConfiguration(object):
         trigger_content = Template(
             resource_string("make_deb", "resources/debian/triggers.j2")
         ).render(self.context)
-        
+
         trigger_filename = "%s.triggers" % self.context['name']
         with open(os.path.join(output_dir, trigger_filename), "wb") as f:
             f.write(trigger_content)
-
-
-def _ask_if_undefined(key, value, default):
-    if not v:
-        v = raw_input(
-            "{} is not defined in setup.py. Please provide {} [{}]: ".format(
-                key, key, default)
-            )
-    return v or default

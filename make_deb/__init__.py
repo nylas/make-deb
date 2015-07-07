@@ -1,0 +1,92 @@
+import datetime
+import os
+from pkg_resources import resource_string
+import shutil
+import subprocess
+
+
+from jinja2 import Template
+
+#String setuptools uses to specify None
+UNKNOWN = "UNKNOWN"
+
+
+class DebianConfiguration(object):
+    '''
+    Given a root directory which contains a setup.py file,
+    initializes debian configuration files in the debian directory
+    '''
+
+    DEBIAN_CONFIGURATION_TEMPLATES = [
+        "resources/debian/changelog.j2",
+        "resources/debian/compat.j2",
+        "resources/debian/control.j2",
+        "resources/debian/rules.j2",
+    ]
+
+    DEFAULT_CONTEXT  = {
+        "compat": 9,
+    }
+
+    def __init__(self, rootdir):
+        self.rootdir = rootdir
+        self.context = self.DEFAULT_CONTEXT.copy()
+        self.context.update({"date": datetime.datetime.now()})
+        self.context.update(self._context_from_setuppy())
+
+    def _context_from_setuppy(self):
+        stdout = subprocess.Popen(
+            ["python", os.path.join(self.rootdir, "setup.py"),
+             "--name", "--version", "--maintainer", "--maintainer-email",
+             "--description"], stdout=subprocess.PIPE).communicate()
+
+        setup_values = stdout[0].split("\n")[0:-1]
+        setup_names = ["name", "version", "maintainer", "maintainer_email",
+                       "description"]
+
+        context = {}
+        for name, value in zip(setup_names, setup_values):
+            while not value or value == UNKNOWN:
+                value = raw_input("{} is not defined in setup.py."
+                                  "Please define: ".format(name))
+                if not value:
+                    print "Invalid value. Please try again"
+
+            context[name] = value
+
+        return context
+
+    def render(self):
+        output_dir = os.path.join(self.rootdir, "debian")
+
+        if os.path.exists(output_dir):
+            shutil.rmtree(output_dir)
+
+        os.mkdir(output_dir)
+
+        for template in self.DEBIAN_CONFIGURATION_TEMPLATES:
+            filename = os.path.basename(template).replace(".j2", "")
+            content = Template(resource_string("make_deb", template)) \
+                               .render(self.context)
+
+            with open(os.path.join(output_dir, filename), "wb") as f:
+                f.write(content)
+
+
+        #Need to to trigger separately because filename must change
+        trigger_content = Template(
+            resource_string("make_deb", "resources/debian/triggers.j2")
+        ).render(self.context)
+        
+        trigger_filename = "%s.triggers" % self.context['name']
+        with open(os.path.join(output_dir, trigger_filename), "wb") as f:
+            f.write(trigger_content)
+
+
+def _ask_if_undefined(key, value, default):
+    if not v:
+        v = raw_input(
+            "{} is not defined in setup.py. Please provide {} [{}]: ".format(
+                key, key, default)
+            )
+    return v or default

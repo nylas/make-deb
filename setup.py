@@ -17,5 +17,6 @@ setup(
             "resources/debian/compat.j2"
             ]
         },
-    scripts=['bin/make-deb']
+    scripts=['bin/make-deb'],
+    install_requires=['Jinja2']
 )

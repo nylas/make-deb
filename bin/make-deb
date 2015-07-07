@@ -2,15 +2,22 @@
 
 import argparse
 import os
+import platform
+import subprocess
+import sys
 
 from make_deb import DebianConfiguration
 
 def init():
     debconf = DebianConfiguration(os.getcwd())
     debconf.render()
+    return 0
 
 def build():
-    print "build!"
+    if platform.linux_distribution()[0] != 'debian':
+        print "Must build on Debian system"
+        return 1
+    subprocess.Popen(["dpkg-buildpackage", "-us", "-uc"])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -19,6 +26,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.command == "init":
-        init()
+        sys.exit(init())
     elif args.command == "build":
-        build()
+        sys.exit(build())

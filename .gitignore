@@ -1,0 +1,10 @@
+# setuptools
+dist
+build
+make_deb.egg-info
+
+# virtualenv
+venv
+
+# emacs
+*~

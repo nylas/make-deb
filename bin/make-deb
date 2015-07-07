@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+
+import argparse
+
+
+def init():
+    print "init!"
+
+def build():
+    print "build!"
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("command", choices=["init", "build"])
+
+    args = parser.parse_args()
+
+    if args.command == "init":
+        init()
+    elif args.command == "build":
+        build()

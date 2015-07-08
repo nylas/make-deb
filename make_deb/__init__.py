@@ -33,6 +33,14 @@ class DebianConfiguration(object):
         self.context = self.DEFAULT_CONTEXT.copy()
         self.context.update({"date": datetime.datetime.now()})
         self.context.update(self._context_from_setuppy())
+        self.context.update(self._context_from_git())
+
+    def _context_from_git(self):
+        stdout = subprocess.Popen(
+            ["git", "log", "-1", "--oneline"],
+            cwd=self.rootdir,
+            stdout=subprocess.PIPE).communicate()
+        return {"latest_git_commit": stdout[0]}
 
     def _context_from_setuppy(self):
         stdout = subprocess.Popen(

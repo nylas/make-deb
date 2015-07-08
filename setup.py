@@ -8,14 +8,18 @@ setup(
     version='0.0.1',
     include_package_data = True,
     packages = ['make_deb'],
+    author = "Rob McQueen",
+    author_email = "rob@nylas.com",
+    maintainer = "Nylas Team",
+    maintainer_email = "support@nylas.com",
+    description = "Generates Debian configuration based on your setup.py",
     package_data = {
         "make_deb": [
             "resources/debian/control.j2",
             "resources/debian/rules.j2",
             "resources/debian/triggers.j2",
             "resources/debian/changelog.j2",
-            "resources/debian/compat.j2",
-            "resources/Vagrantfile"
+            "resources/debian/compat.j2"
             ]
         },
     scripts=['bin/make-deb'],

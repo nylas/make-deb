@@ -7,7 +7,7 @@ import subprocess
 
 from jinja2 import Template
 
-#String setuptools uses to specify None
+# String setuptools uses to specify None
 UNKNOWN = "UNKNOWN"
 
 
@@ -24,7 +24,7 @@ class DebianConfiguration(object):
         "resources/debian/rules.j2",
     ]
 
-    DEFAULT_CONTEXT  = {
+    DEFAULT_CONTEXT = {
         "compat": 9,
     }
 
@@ -55,8 +55,9 @@ class DebianConfiguration(object):
         context = {}
         for name, value in zip(setup_names, setup_values):
             while not value or value == UNKNOWN:
-                value = raw_input("{} is not defined in setup.py."
-                                  "Please define: ".format(name))
+                value = raw_input(
+                    "The '{}' parameter is not defined in setup.py. "
+                    "Please define it for debian configuration: ".format(name))
                 if not value:
                     print "Invalid value. Please try again"
 
@@ -75,13 +76,12 @@ class DebianConfiguration(object):
         for template in self.DEBIAN_CONFIGURATION_TEMPLATES:
             filename = os.path.basename(template).replace(".j2", "")
             content = Template(resource_string("make_deb", template)) \
-                               .render(self.context)
+                .render(self.context)
 
             with open(os.path.join(output_dir, filename), "wb") as f:
                 f.write(content)
 
-
-        #Need to to trigger separately because filename must change
+        # Need to to trigger separately because filename must change
         trigger_content = Template(
             resource_string("make_deb", "resources/debian/triggers.j2")
         ).render(self.context)

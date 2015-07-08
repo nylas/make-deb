@@ -1,31 +1,17 @@
 #!/usr/bin/env python
 
-import argparse
 import os
-import platform
-import subprocess
 import sys
 
 from make_deb import DebianConfiguration
 
-def init():
+
+def main():
     debconf = DebianConfiguration(os.getcwd())
     debconf.render()
-    return 0
 
-def build():
-    if platform.linux_distribution()[0] != 'debian':
-        print "Must build on Debian system"
-        return 1
-    subprocess.Popen(["dpkg-buildpackage", "-us", "-uc"])
+    print "'debian' directory successfully placed at the root of your repository"
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["init", "build"])
-
-    args = parser.parse_args()
-
-    if args.command == "init":
-        sys.exit(init())
-    elif args.command == "build":
-        sys.exit(build())
+    main()
+    sys.exit(0)

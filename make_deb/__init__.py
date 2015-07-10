@@ -10,6 +10,9 @@ from jinja2 import Template
 # String setuptools uses to specify None
 UNKNOWN = "UNKNOWN"
 
+class DebianConfigurationException(Exception):
+    pass
+
 
 class DebianConfiguration(object):
     '''
@@ -43,6 +46,9 @@ class DebianConfiguration(object):
         return {"latest_git_commit": stdout[0]}
 
     def _context_from_setuppy(self):
+        setuppy_path = os.path.join(self.rootdir, "setup.py")
+        if not os.path.exists(setuppy_path):
+            raise DebianConfigurationException("Failed to find setup.py")
         stdout = subprocess.Popen(
             ["python", os.path.join(self.rootdir, "setup.py"),
              "--name", "--version", "--maintainer", "--maintainer-email",

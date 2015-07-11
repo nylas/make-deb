@@ -94,4 +94,4 @@ class DebianConfiguration(object):
 
         trigger_filename = "%s.triggers" % self.context['name']
         with open(os.path.join(output_dir, trigger_filename), "wb") as f:
-            f.write(trigger_content)
+            f.write(trigger_content+"\n")

@@ -10,7 +10,9 @@ Make-deb is a simple tool that generates Debian configuration based on your setu
 
    'debian' directory successfully placed at the root of your repository
 
-If setuptools does not have complete information, make-deb will ask for additional information (for example, maintainer email). After initialization, a directory named "debian" will be reated at the root of your repo. Assuming you have dh-virtualenv installed, you should be able to simply create a .deb from your python project by running the following command at the root of your project.
+If setuptools does not have complete information, make-deb will ask for additional information (for example, maintainer email). After initialization, a directory named "debian" will be reated at the root of your repo. 
+
+Make sure you have the `latest version<https://launchpad.net/~dh-virtualenv/+archive/ubuntu/daily>`_ of dh-virtualenv installed. You should be able to simply create a .deb from your python project by running the following command at the root of your project.
 
 .. code-block:: bash
 

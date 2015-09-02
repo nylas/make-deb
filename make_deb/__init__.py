@@ -10,6 +10,7 @@ from jinja2 import Template
 # String setuptools uses to specify None
 UNKNOWN = "UNKNOWN"
 
+
 class DebianConfigurationException(Exception):
     pass
 
@@ -75,6 +76,10 @@ class DebianConfiguration(object):
         output_dir = os.path.join(self.rootdir, "debian")
 
         if os.path.exists(output_dir):
+            res = raw_input("A debian directory exists. Replace it? [Y/n]: ")
+            if res.lower() in ["n", "no"]:
+                raise DebianConfigurationException(
+                    "Not removing debian directory")
             shutil.rmtree(output_dir)
 
         os.mkdir(output_dir)

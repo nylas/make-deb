@@ -40,11 +40,17 @@ class DebianConfiguration(object):
         self.context.update(self._context_from_git())
 
     def _context_from_git(self):
-        stdout = subprocess.Popen(
-            ["git", "log", "-1", "--oneline"],
-            cwd=self.rootdir,
-            stdout=subprocess.PIPE).communicate()
-        return {"latest_git_commit": stdout[0]}
+        try:
+            stdout = subprocess.Popen(
+                ["git", "log", "-1", "--oneline"],
+                cwd=self.rootdir,
+                stdout=subprocess.PIPE).communicate()
+            return {"latest_git_commit": stdout[0]}
+        except OSError:
+            raise DebianConfigurationException("Please install git")
+        except Exception as e:
+            raise DebianConfigurationException(
+                "Unknown error occurred when invoking git: %s" % e)
 
     def _context_from_setuppy(self):
         setuppy_path = os.path.join(self.rootdir, "setup.py")

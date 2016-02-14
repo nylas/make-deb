@@ -23,6 +23,6 @@ setup(
             ]
         },
     scripts=['bin/make-deb'],
-    install_requires=['Jinja2'],
+    install_requires=['future', 'Jinja2'],
     zip_safe=False
 )

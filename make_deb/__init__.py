@@ -4,7 +4,7 @@ from pkg_resources import resource_string
 import shutil
 import subprocess
 
-
+from builtins import input
 from jinja2 import Template
 
 # String setuptools uses to specify None
@@ -61,18 +61,18 @@ class DebianConfiguration(object):
              "--name", "--version", "--maintainer", "--maintainer-email",
              "--description"], stdout=subprocess.PIPE).communicate()
 
-        setup_values = stdout[0].split("\n")[0:-1]
+        setup_values = stdout[0].decode('utf-8').split('\n')[:-1]
         setup_names = ["name", "version", "maintainer", "maintainer_email",
                        "description"]
 
         context = {}
         for name, value in zip(setup_names, setup_values):
             while not value or value == UNKNOWN:
-                value = raw_input(
+                value = input(
                     "The '{}' parameter is not defined in setup.py. "
                     "Please define it for debian configuration: ".format(name))
                 if not value:
-                    print "Invalid value. Please try again"
+                    print("Invalid value. Please try again")
 
             context[name] = value
 
@@ -82,7 +82,7 @@ class DebianConfiguration(object):
         output_dir = os.path.join(self.rootdir, "debian")
 
         if os.path.exists(output_dir):
-            res = raw_input("A debian directory exists. Replace it? [Y/n]: ")
+            res = input("A debian directory exists. Replace it? [Y/n]: ")
             if res.lower() in ["n", "no"]:
                 raise DebianConfigurationException(
                     "Not removing debian directory")
@@ -92,17 +92,19 @@ class DebianConfiguration(object):
 
         for template in self.DEBIAN_CONFIGURATION_TEMPLATES:
             filename = os.path.basename(template).replace(".j2", "")
-            content = Template(resource_string("make_deb", template)) \
-                .render(self.context)
+            content = Template(
+                resource_string("make_deb", template).decode('utf-8')
+            ).render(self.context)
 
-            with open(os.path.join(output_dir, filename), "wb") as f:
+            with open(os.path.join(output_dir, filename), "w") as f:
                 f.write(content)
 
         # Need to to trigger separately because filename must change
         trigger_content = Template(
-            resource_string("make_deb", "resources/debian/triggers.j2")
+            resource_string("make_deb", "resources/debian/triggers.j2").
+            decode('utf-8')
         ).render(self.context)
 
         trigger_filename = "%s.triggers" % self.context['name']
-        with open(os.path.join(output_dir, trigger_filename), "wb") as f:
+        with open(os.path.join(output_dir, trigger_filename), "w") as f:
             f.write(trigger_content+"\n")

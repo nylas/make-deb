@@ -1,3 +1,5 @@
+import setuptools
+from distutils.core import run_setup
 import datetime
 import os
 from pkg_resources import resource_string
@@ -56,17 +58,24 @@ class DebianConfiguration(object):
         setuppy_path = os.path.join(self.rootdir, "setup.py")
         if not os.path.exists(setuppy_path):
             raise DebianConfigurationException("Failed to find setup.py")
-        stdout = subprocess.Popen(
-            ["python", os.path.join(self.rootdir, "setup.py"),
-             "--name", "--version", "--maintainer", "--maintainer-email",
-             "--description"], stdout=subprocess.PIPE).communicate()
 
-        setup_values = stdout[0].decode('utf-8').split('\n')[:-1]
-        setup_names = ["name", "version", "maintainer", "maintainer_email",
-                       "description"]
+        dist = run_setup(setuppy_path)
+        context = {
+            'name': dist.get_name(),
+            'version': dist.get_version(),
+            'maintainer': dist.get_maintainer(),
+            'maintainer_email': dist.get_maintainer_email(),
+            'description': dist.get_description(),
+        }
 
-        context = {}
-        for name, value in zip(setup_names, setup_values):
+        scripts = []
+        if dist.entry_points is not None and 'console_scripts' in dist.entry_points:
+            scripts += [script.split('=')[0] for script in dist.entry_points['console_scripts']]
+
+        if dist.scripts is not None:
+            scripts += [script.rsplit('/', 1)[-1] for script in dist.scripts]
+
+        for name, value in context.items():
             while not value or value == UNKNOWN:
                 value = input(
                     "The '{}' parameter is not defined in setup.py. "
@@ -75,6 +84,8 @@ class DebianConfiguration(object):
                     print("Invalid value. Please try again")
 
             context[name] = value
+
+        context['scripts'] = scripts
 
         return context
 
@@ -100,11 +111,12 @@ class DebianConfiguration(object):
                 f.write(content)
 
         # Need to to trigger separately because filename must change
-        trigger_content = Template(
-            resource_string("make_deb", "resources/debian/triggers.j2").
-            decode('utf-8')
-        ).render(self.context)
+        for template in ['resources/debian/triggers.j2', 'resources/debian/links.j2']:
+            trigger_content = Template(
+                resource_string("make_deb", template).
+                decode('utf-8')
+            ).render(self.context)
 
-        trigger_filename = "%s.triggers" % self.context['name']
-        with open(os.path.join(output_dir, trigger_filename), "w") as f:
-            f.write(trigger_content+"\n")
+            trigger_filename = "%s.%s" % (self.context['name'], template.split('.j2')[0].rsplit('/',1)[-1])
+            with open(os.path.join(output_dir, trigger_filename), "w") as f:
+                f.write(trigger_content+"\n")

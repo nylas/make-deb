@@ -5,6 +5,8 @@ import sys
 
 from make_deb import DebianConfiguration, DebianConfigurationException
 
+reload(sys)
+sys.setdefaultencoding('UTF8')
 
 def main():
     try:

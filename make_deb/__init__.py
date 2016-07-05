@@ -1,3 +1,4 @@
+import codecs
 import datetime
 import os
 from pkg_resources import resource_string
@@ -45,7 +46,7 @@ class DebianConfiguration(object):
                 ["git", "log", "-1", "--oneline"],
                 cwd=self.rootdir,
                 stdout=subprocess.PIPE).communicate()
-            return {"latest_git_commit": stdout[0]}
+            return {"latest_git_commit": stdout[0].decode('utf-8')}
         except OSError:
             raise DebianConfigurationException("Please install git")
         except Exception as e:
@@ -96,7 +97,7 @@ class DebianConfiguration(object):
                 resource_string("make_deb", template).decode('utf-8')
             ).render(self.context)
 
-            with open(os.path.join(output_dir, filename), "w") as f:
+            with codecs.open(os.path.join(output_dir, filename), "w", 'utf-8') as f:
                 f.write(content)
 
         # Need to to trigger separately because filename must change

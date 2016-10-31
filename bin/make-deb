@@ -3,14 +3,48 @@
 import os
 import sys
 
+import click
+
 from make_deb import DebianConfiguration, DebianConfigurationException
 
 reload(sys)
 sys.setdefaultencoding('UTF8')
 
-def main():
+
+def get_dh_virtualenv_options(python, test):
+    dh_virtualenv_options = []
+    if not test:
+        dh_virtualenv_options.append('--no-test')
+    if python:
+        dh_virtualenv_options.append('--python ' + python)
+    return dh_virtualenv_options
+
+
+@click.command()
+@click.option('--python',
+              default=None,
+              metavar='/path/to/python',
+              help='Path to Python executable to use '
+                   '(e.g.: /usr/bin/python or /usr/bin/python3')
+@click.option('--python-version',
+              type=click.Choice(['2.x', '3.4', '3.5']),
+              default='2.x',
+              help='Python version')
+@click.option('--test/--no-test',
+              default=True,
+              help='Whether to run python setup.py test')
+@click.option('--postinst-commands',
+              default=None,
+              help='Commands to put in postinst script')
+def main(python, python_version, test, postinst_commands):
+    dh_virtualenv_options = get_dh_virtualenv_options(python, test)
     try:
-        debconf = DebianConfiguration(os.getcwd())
+        debconf = DebianConfiguration(
+            os.getcwd(),
+            python_version=python_version,
+            dh_virtualenv_options=dh_virtualenv_options,
+            postinst_commands=postinst_commands,
+        )
         debconf.render()
     except DebianConfigurationException as e:
         print(e)
@@ -18,6 +52,7 @@ def main():
 
     print("'debian' directory successfully placed at the root of your repository")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

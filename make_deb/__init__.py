@@ -32,12 +32,24 @@ class DebianConfiguration(object):
         "compat": 9,
     }
 
-    def __init__(self, rootdir):
+    def __init__(self, rootdir,
+                 python_version='2.x', dh_virtualenv_options=None,
+                 postinst_commands=None):
         self.rootdir = rootdir
         self.context = self.DEFAULT_CONTEXT.copy()
         self.context.update({"date": datetime.datetime.now()})
         self.context.update(self._context_from_setuppy())
         self.context.update(self._context_from_git())
+        if python_version == '3.5':
+            self.context.update({"pre_depends_python": "python3.5"})
+        elif python_version == '3.4':
+            self.context.update({"pre_depends_python": "python3.4"})
+        else:
+            self.context.update({
+                "pre_depends_python": "python2.7-minimal | python2.6-minimal"})
+        self.context.update({"python_version": python_version})
+        self.context.update({"dh_virtualenv_options": dh_virtualenv_options})
+        self.context.update({"postinst_commands": postinst_commands})
 
     def _context_from_git(self):
         try:
@@ -106,5 +118,14 @@ class DebianConfiguration(object):
         ).render(self.context)
 
         trigger_filename = "%s.triggers" % self.context['name']
+        with open(os.path.join(output_dir, trigger_filename), "w") as f:
+            f.write(trigger_content+"\n")
+
+        trigger_content = Template(
+            resource_string("make_deb", "resources/debian/postinst.j2").
+            decode('utf-8')
+        ).render(self.context)
+
+        trigger_filename = "%s.postinst" % self.context['name']
         with open(os.path.join(output_dir, trigger_filename), "w") as f:
             f.write(trigger_content+"\n")

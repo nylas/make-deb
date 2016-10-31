@@ -2,3 +2,7 @@
 
 %:
 	dh $@ --with python-virtualenv
+{% if dh_virtualenv_options %}
+override_dh_virtualenv:
+	dh_virtualenv {{ ' '.join(dh_virtualenv_options) }}
+{% endif %}

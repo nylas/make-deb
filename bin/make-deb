@@ -33,13 +33,17 @@ def get_dh_virtualenv_options(python, test):
 @click.option('--test/--no-test',
               default=True,
               help='Whether to run python setup.py test')
-def main(python, python_version, test):
+@click.option('--postinst-commands',
+              default=None,
+              help='Commands to put in postinst script')
+def main(python, python_version, test, postinst_commands):
     dh_virtualenv_options = get_dh_virtualenv_options(python, test)
     try:
         debconf = DebianConfiguration(
             os.getcwd(),
             python_version=python_version,
             dh_virtualenv_options=dh_virtualenv_options,
+            postinst_commands=postinst_commands,
         )
         debconf.render()
     except DebianConfigurationException as e:

@@ -32,12 +32,20 @@ class DebianConfiguration(object):
         "compat": 9,
     }
 
-    def __init__(self, rootdir):
+    def __init__(self, rootdir, python_version='2.x', dh_virtualenv_options=None):
         self.rootdir = rootdir
         self.context = self.DEFAULT_CONTEXT.copy()
         self.context.update({"date": datetime.datetime.now()})
         self.context.update(self._context_from_setuppy())
         self.context.update(self._context_from_git())
+        if python_version == '3.5':
+            self.context.update({"pre_depends_python": "python3.5"})
+        elif python_version == '3.4':
+            self.context.update({"pre_depends_python": "python3.4"})
+        else:
+            self.context.update({
+                "pre_depends_python": "python2.7-minimal | python2.6-minimal"})
+        self.context.update({"dh_virtualenv_options": dh_virtualenv_options})
 
     def _context_from_git(self):
         try:

@@ -45,6 +45,7 @@ class DebianConfiguration(object):
         else:
             self.context.update({
                 "pre_depends_python": "python2.7-minimal | python2.6-minimal"})
+        self.context.update({"python_version": python_version})
         self.context.update({"dh_virtualenv_options": dh_virtualenv_options})
 
     def _context_from_git(self):
